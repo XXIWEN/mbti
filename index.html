@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="MBTI 十六型人格测试，60 道题，7 档量表，约 10 分钟。">
+<title>MBTI 十六型人格测试</title>
+<style>
+  :root {
+    --paper: #FAFAF7;
+    --white: #FFFFFF;
+    --ink: #1A2332;
+    --ink-2: #4A5568;
+    --ink-3: #889298;
+    --line: #E2DED4;
+    --line-2: #C9C4B8;
+    --accent: #2E9E5B;
+    --accent-2: #23855C;
+    --agree: #2E9E5B;
+    --disagree: #BE7A43;
+    --analyst: #88619A;
+    --diplomat: #33A474;
+    --sentinel: #4298B4;
+    --explorer: #E4AE3A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  main {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .view { display: none; }
+  .view.active { display: flex; }
+
+  .container {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---------- Landing ---------- */
+  #view-landing {
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 96px 0 72px;
+  }
+
+  .kicker {
+    font-size: 13px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+
+  .landing-title {
+    font-size: clamp(34px, 6vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 18px 0 14px;
+    color: var(--ink);
+  }
+
+  .landing-meta {
+    font-size: 15px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+
+  .landing-meta .sep { color: var(--line-2); margin: 0 10px; }
+
+  .landing-desc {
+    margin-top: 34px;
+    font-size: 16px;
+    color: var(--ink-2);
+    max-width: 560px;
+  }
+
+  .landing-cta {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    padding: 15px 34px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary:hover {
+    background: var(--accent-2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(46, 158, 91, 0.24);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .btn-ghost:hover { color: var(--ink); background: rgba(26, 35, 50, 0.05); }
+
+  .landing-note {
+    margin-top: 56px;
+    font-size: 13px;
+    color: var(--ink-3);
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+  }
+
+  /* ---------- Test ---------- */
+  #view-test {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .test-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 28px 0;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--line-2);
+    color: var(--ink-2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn-back:hover { border-color: var(--ink-3); color: var(--ink); }
+  .btn-back:disabled { opacity: 0.35; cursor: default; }
+
+  .test-count {
+    font-size: 14px;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+    flex: 1;
+    text-align: center;
+  }
+  .test-count b { color: var(--ink-2); font-weight: 600; }
+
+  .test-exit {
+    background: transparent;
+    border: none;
+    color: var(--ink-3);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    width: 40px;
+    text-align: right;
+  }
+  .test-exit:hover { color: var(--ink); }
+
+  .progress-track {
+    max-width: 720px;
+    width: 100%;
+    margin: 20px auto 0;
+    padding: 0 28px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.35s ease;
+    border-radius: 2px;
+  }
+
+  .question-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 48px 28px;
+  }
+
+  .question {
+    font-size: clamp(24px, 3.6vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    color: var(--ink);
+    animation: qIn 0.32s ease;
+  }
+
+  @keyframes qIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .scale {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 56px;
+  }
+
+  .scale-lbl {
+    font-size: 14px;
+    color: var(--ink-3);
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .dots {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dot {
+    border-radius: 50%;
+    border: 2px solid var(--line-2);
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.28s cubic-bezier(0.34, 1.75, 0.64, 1), background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .dot[data-i="0"] { width: 40px; height: 40px; }
+  .dot[data-i="1"] { width: 34px; height: 34px; }
+  .dot[data-i="2"] { width: 28px; height: 28px; }
+  .dot[data-i="3"] { width: 22px; height: 22px; }
+  .dot[data-i="4"] { width: 28px; height: 28px; }
+  .dot[data-i="5"] { width: 34px; height: 34px; }
+  .dot[data-i="6"] { width: 40px; height: 40px; }
+
+  .dot[data-i="0"], .dot[data-i="1"], .dot[data-i="2"] { border-color: rgba(46, 158, 91, 0.5); }
+  .dot[data-i="4"], .dot[data-i="5"], .dot[data-i="6"] { border-color: rgba(190, 122, 67, 0.5); }
+
+  .dot:hover { transform: scale(1.08); }
+  .dot[data-i="0"]:hover, .dot[data-i="1"]:hover, .dot[data-i="2"]:hover { border-color: var(--agree); }
+  .dot[data-i="4"]:hover, .dot[data-i="5"]:hover, .dot[data-i="6"]:hover { border-color: var(--disagree); }
+  .dot[data-i="3"]:hover { border-color: var(--ink-3); }
+
+  .dot.filled.agree { background: var(--agree); border-color: var(--agree); }
+  .dot.filled.disagree { background: var(--disagree); border-color: var(--disagree); }
+  .dot.filled.neutral { background: var(--ink-3); border-color: var(--ink-3); }
+
+  .dot.selected { transform: scale(1.6); }
+  .dot.selected.agree { box-shadow: 0 0 0 7px rgba(46, 158, 91, 0.2); }
+  .dot.selected.disagree { box-shadow: 0 0 0 7px rgba(190, 122, 67, 0.2); }
+  .dot.selected.neutral { box-shadow: 0 0 0 7px rgba(136, 146, 152, 0.2); }
+
+  .test-foot {
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 28px 44px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .hint {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  /* ---------- Result ---------- */
+  #view-result {
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  .result-top {
+    padding: 72px 0 40px;
+    text-align: center;
+  }
+
+  .result-kicker {
+    font-size: 13px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+
+  .type-code {
+    font-size: clamp(56px, 11vw, 88px);
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    margin: 20px 0 10px;
+    color: var(--ink);
+  }
+
+  .type-name {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  .type-nick {
+    margin-top: 10px;
+    font-size: 15px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+  .type-nick b { color: var(--ink); font-weight: 600; }
+
+  .type-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+  .role-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .result-tagline {
+    margin-top: 22px;
+    font-size: 17px;
+    color: var(--ink-2);
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .result-body {
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  .dims {
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+
+  .dim {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dim-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .dim-head .b { color: var(--ink-3); font-weight: 500; }
+
+  .dim-track {
+    position: relative;
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+  }
+  .dim-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .dim-marker {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--accent);
+    transform: translate(-50%, -50%);
+    transition: left 0.6s ease;
+  }
+  .dim-pct {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .dim-pct b { color: var(--ink-2); font-weight: 600; }
+
+  .result-section {
+    margin-top: 44px;
+  }
+
+  .result-section h3 {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .result-section p {
+    font-size: 16px;
+    color: var(--ink-2);
+    text-align: justify;
+    text-justify: inter-ideograph;
+  }
+
+  .trait-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+  }
+  .trait-col h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .trait-col ul {
+    list-style: none;
+  }
+  .trait-col li {
+    font-size: 15px;
+    color: var(--ink-2);
+    padding: 7px 0 7px 18px;
+    position: relative;
+  }
+  .trait-col li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .careers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .career {
+    font-size: 14px;
+    color: var(--ink-2);
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    padding: 7px 18px;
+  }
+
+  .result-actions {
+    margin-top: 56px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .watermark {
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    color: rgba(74, 85, 104, 0.6);
+    margin-top: 14px;
+    user-select: none;
+  }
+
+  @media (max-width: 560px) {
+    .trait-list { grid-template-columns: 1fr; gap: 24px; }
+    .scale { gap: 12px; }
+    .dot[data-i="0"], .dot[data-i="6"] { width: 32px; height: 32px; }
+    .dot[data-i="1"], .dot[data-i="5"] { width: 28px; height: 28px; }
+    .dot[data-i="2"], .dot[data-i="4"] { width: 24px; height: 24px; }
+    .dot[data-i="3"] { width: 19px; height: 19px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <!-- Landing -->
+  <section id="view-landing" class="view active">
+    <div class="container">
+      <div class="kicker">MBTI · 荣格类型学</div>
+      <h1 class="landing-title">十六型人格测试</h1>
+      <div class="landing-meta">
+        60 道题<span class="sep">·</span>约 10 分钟<span class="sep">·</span>7 档量表
+      </div>
+      <div class="watermark">by.雯</div>
+      <p class="landing-desc">
+        通过四个维度的偏好，了解你获取能量的方式、接收信息的习惯、做决定的依据，以及面对生活的方式，找到属于你的十六型人格。
+      </p>
+      <div class="landing-cta">
+        <button class="btn btn-primary" id="btn-start">开始测试</button>
+      </div>
+      <p class="landing-note">
+        本测试基于荣格与 MBTI 人格理论改编，结果仅供自我了解与娱乐参考，不构成任何心理诊断。
+      </p>
+    </div>
+  </section>
+
+  <!-- Test -->
+  <section id="view-test" class="view">
+    <header class="test-head">
+      <button class="btn-back" id="btn-prev" disabled aria-label="上一题">‹</button>
+      <div class="test-count">第 <b id="q-cur">1</b> / 60 题</div>
+      <button class="test-exit" id="btn-exit">退出</button>
+    </header>
+    <div class="progress-track">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="watermark">by.雯</div>
+    <div class="question-wrap">
+      <h2 class="question" id="question-text"></h2>
+      <div class="scale">
+        <span class="scale-lbl">同意</span>
+        <div class="dots" id="dots"></div>
+        <span class="scale-lbl">不同意</span>
+      </div>
+    </div>
+    <div class="test-foot">
+      <span class="hint">选择最符合你的程度，选完自动进入下一题</span>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section id="view-result" class="view">
+    <div class="result-top">
+      <div class="result-kicker">你的人格类型</div>
+      <div class="watermark">by.雯</div>
+      <div class="type-code" id="r-code"></div>
+      <div class="type-name" id="r-name"></div>
+      <div class="type-nick" id="r-nick"></div>
+      <div class="type-role" id="r-role"></div>
+      <p class="result-tagline" id="r-tagline"></p>
+    </div>
+    <div class="result-body">
+      <div class="dims" id="r-dims"></div>
+      <div class="result-section" id="r-overview"></div>
+      <div class="result-section trait-list" id="r-traits"></div>
+      <div class="result-section" id="r-careers"></div>
+      <div class="result-actions">
+        <button class="btn btn-primary" id="btn-retry">重新测试</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const QUESTIONS = [
+  { d: "EI", s:  1, t: "你经常主动结识新朋友，而不是等别人来接近你。" },
+  { d: "SN", s: -1, t: "你经常沉浸在对未来的想象和各种可能性里。" },
+  { d: "TF", s:  1, t: "做决定时，你更依赖逻辑和客观分析，而不是个人感受。" },
+  { d: "JP", s:  1, t: "你习惯提前把一切安排妥当，讨厌临时的变动。" },
+  { d: "EI", s: -1, t: "独处能让你恢复精力，长时间社交会让你感到疲惫。" },
+  { d: "SN", s:  1, t: "比起抽象的概念，你更关注眼前具体的事实和细节。" },
+  { d: "TF", s: -1, t: "你很容易感受到别人的情绪，并会跟着一起担心。" },
+  { d: "JP", s: -1, t: "你更喜欢保持灵活，随时根据情况调整计划。" },
+  { d: "EI", s:  1, t: "在聚会或社交场合，你会主动跟陌生人搭话。" },
+  { d: "SN", s: -1, t: "你喜欢琢磨事物背后的深层含义和规律。" },
+  { d: "TF", s:  1, t: "你能够就事论事地指出问题，哪怕会让人不太舒服。" },
+  { d: "JP", s:  1, t: "你喜欢把事情尽早完成，而不是拖到最后一刻。" },
+  { d: "EI", s: -1, t: "比起参加热闹的聚会，你更愿意一个人安静地待着。" },
+  { d: "SN", s:  1, t: "你做事喜欢按部就班、遵循明确的步骤。" },
+  { d: "TF", s: -1, t: "做决定时，你会优先考虑别人的感受。" },
+  { d: "JP", s: -1, t: "你常常拖到临近截止才开始动手。" },
+  { d: "EI", s:  1, t: "与人相处让你充满能量，独处太久反而会烦躁。" },
+  { d: "SN", s: -1, t: "比起具体细节，你更关注整体的图景和大方向。" },
+  { d: "TF", s:  1, t: "你不太容易被情绪化的言论打动。" },
+  { d: "JP", s:  1, t: "你的桌面、文件和时间表通常都井井有条。" },
+  { d: "EI", s: -1, t: "你在发言前习惯先想清楚，而不是边说边想。" },
+  { d: "SN", s:  1, t: "你更相信亲身体验和实际经验，而不是凭空想象。" },
+  { d: "TF", s: -1, t: "你希望自己说的话能让人感到温暖、被理解。" },
+  { d: "JP", s: -1, t: "你不喜欢被安排得明明白白，喜欢留有余地。" },
+  { d: "EI", s:  1, t: "你喜欢成为人群中的焦点。" },
+  { d: "SN", s: -1, t: "你常常会冒出一些看似天马行空的想法。" },
+  { d: "TF", s:  1, t: "你认为做判断时，理性应该排在感情之前。" },
+  { d: "JP", s:  1, t: "你会为旅行和活动提前做好详细的安排。" },
+  { d: "EI", s: -1, t: "你更愿意和少数几个深交的朋友相处，而不是泛泛之交。" },
+  { d: "SN", s:  1, t: "你描述事情时习惯讲具体细节，而不是只讲大概印象。" },
+  { d: "TF", s: -1, t: "你更看重人际关系的和谐，而不是非要分出对错。" },
+  { d: "JP", s: -1, t: "比起提前规划，你更倾向于边走边看。" },
+  { d: "EI", s:  1, t: "你在集体讨论中总是抢着表达自己的看法。" },
+  { d: "SN", s: -1, t: "你觉得按部就班的生活有点枯燥，渴望新的可能性。" },
+  { d: "TF", s:  1, t: "你习惯指出别人逻辑上的漏洞，哪怕对方会不高兴。" },
+  { d: "JP", s:  1, t: "你喜欢事情尘埃落定、有确定结论的感觉。" },
+  { d: "EI", s: -1, t: "电话、视频这类需要即时回应的沟通会让你有点紧张。" },
+  { d: "SN", s:  1, t: "你记得住很多具体的事实、数字和细节。" },
+  { d: "TF", s: -1, t: "你会为了照顾别人的感受而调整自己的做法。" },
+  { d: "JP", s: -1, t: "你喜欢同时推进好几件事，而不是一件一件来。" },
+  { d: "EI", s:  1, t: "参加完热闹的活动后，你会感到兴奋而不是疲惫。" },
+  { d: "SN", s: -1, t: "你更喜欢讨论理论和概念，而不是具体的操作细节。" },
+  { d: "TF", s:  1, t: "朋友向你诉苦时，你的第一反应是帮对方分析怎么解决。" },
+  { d: "JP", s:  1, t: "你习惯列清单、做待办事项。" },
+  { d: "EI", s: -1, t: "人多的时候，你更愿意待在角落观察。" },
+  { d: "SN", s:  1, t: "你更信任看得见、摸得着的东西。" },
+  { d: "TF", s: -1, t: "听到感人的故事时，你很容易被触动。" },
+  { d: "JP", s: -1, t: "你享受自由散漫、没有严格时间表的生活。" },
+  { d: "EI", s:  1, t: "你认识很多人，朋友遍布不同的圈子。" },
+  { d: "SN", s: -1, t: "你有时会走神，沉浸在自己的想法世界里。" },
+  { d: "TF", s:  1, t: "你欣赏那些能冷静、客观分析问题的人。" },
+  { d: "JP", s:  1, t: "你讨厌计划被打乱。" },
+  { d: "EI", s: -1, t: "你更喜欢用文字交流，而不是面对面聊个不停。" },
+  { d: "SN", s:  1, t: "你更喜欢有明确步骤和标准答案的任务。" },
+  { d: "TF", s: -1, t: "在做决定前，体谅他人比讲道理更重要。" },
+  { d: "JP", s: -1, t: "你的计划经常变来变去。" },
+  { d: "EI", s:  1, t: "你喜欢把新认识的人拉进你的社交圈。" },
+  { d: "SN", s: -1, t: "你总能从一个信息联想到更多相关的可能性。" },
+  { d: "TF", s:  1, t: "你能够为了客观的事实，暂时放下个人的好恶。" },
+  { d: "JP", s:  1, t: "你倾向于尽快做决定，而不是一直保留各种可能。" }
+];
+
+const DIMS = [
+  { key: "EI", a: "外向", b: "内向", al: "E", bl: "I" },
+  { key: "SN", a: "实感", b: "直觉", al: "S", bl: "N" },
+  { key: "TF", a: "思考", b: "情感", al: "T", bl: "F" },
+  { key: "JP", a: "判断", b: "知觉", al: "J", bl: "P" }
+];
+
+const TYPES = {
+  INTJ: { name: "建筑师", nick: "紫老头", role: "分析师", roleEn: "NT", color: "#88619A",
+    tagline: "富有想象力的战略型思想家，一切尽在计划之中。",
+    overview: "INTJ 是十六型人格中最独立、最有远见的一种。他们习惯用长远的眼光规划人生，做任何事之前都会先在脑中推演一遍，看穿事物的本质再动手。他们安静、克制，不轻易流露情绪，却对认定的目标有着惊人的执着，一旦决定了就很难被外界动摇。他们享受独自思考，对效率和理性有很高的要求，也因此常常显得疏离而难以接近。",
+    strengths: ["战略眼光长远，善于全局规划", "逻辑严密，独立思考能力强", "目标感强，执行力高", "冷静克制，不易被情绪左右"],
+    weaknesses: ["过于理性，显得冷淡疏离", "对自己和他人要求苛刻", "不擅长表达情感和寒暄", "容易过度自信、听不进意见"],
+    careers: ["战略顾问", "架构师", "科研人员", "律师", "金融分析师", "产品经理"] },
+  INTP: { name: "逻辑学家", nick: "瓶子姐", role: "分析师", roleEn: "NT", color: "#88619A",
+    tagline: "永不满足的求知者，一生都在拆解世界运行的原理。",
+    overview: "INTP 是天生的理论家，对「为什么」有着无穷无尽的好奇。他们享受独自钻研抽象概念，脑中随时都在构建、验证和推翻模型。他们谦和随性、不争不抢，但在自己感兴趣的领域里极度专注和较真，常常为了一个想法废寝忘食。他们看重逻辑的自洽，讨厌含糊和想当然，表达上却可能显得零散、离题。",
+    strengths: ["逻辑分析与抽象思维极强", "客观公正，不容易有偏见", "想法原创，富有创造力", "求知欲旺盛，乐于钻研"],
+    weaknesses: ["容易陷入空想，拖延执行", "不善处理琐事和日常社交", "表达散漫，让人跟不上思路", "对细节和收尾缺乏耐心"],
+    careers: ["程序员", "数学家", "物理学家", "研究员", "数据分析师", "哲学教师"] },
+  ENTJ: { name: "指挥官", nick: "大姐头", role: "分析师", roleEn: "NT", color: "#88619A",
+    tagline: "天生的领导者，永远在寻找更高效的解决方案。",
+    overview: "ENTJ 果断、有魄力，天生习惯掌控局面、发号施令。他们目标明确、精力充沛，善于把复杂问题拆解成可执行的步骤，并推动团队一步步落地。他们相信效率和结果，讨厌拖沓、含糊和无意义的客套。对他们来说，把事做成比什么都重要，这种强势的推动力既令人敬佩，也偶尔让人觉得压迫。",
+    strengths: ["领导力和决策力强", "战略思维清晰，善抓重点", "抗压能力强，行动果断", "善于组织资源和调动他人"],
+    weaknesses: ["强势，缺乏耐心", "容易忽略他人的感受", "对自己和他人都压得太紧", "不擅长处理不确定和模糊"],
+    careers: ["企业高管", "创业者", "管理咨询", "项目经理", "律师", "投资经理"] },
+  ENTP: { name: "辩论家", nick: "骨折眉毛", role: "分析师", roleEn: "NT", color: "#88619A",
+    tagline: "敏捷机智的思想者，从不放过任何一次智力上的交锋。",
+    overview: "ENTP 思维敏捷、口才出众，享受挑战常规、拆解权威的过程。他们创意源源不断，总能发现别人看不到的可能性和漏洞，也热衷于把自己的新点子分享给所有人。他们对新鲜事物充满热情，善于即兴发挥、随机应变，但也因此容易对一成不变的生活感到厌倦，常常在一件事快完成时失去兴趣。",
+    strengths: ["反应快、思路活、点子多", "善于即兴表达和说服", "敢于质疑，不盲从权威", "学习能力强，触类旁通"],
+    weaknesses: ["容易喜新厌旧、半途而废", "爱抬杠，显得挑衅", "细节和落地执行是短板", "难以长期专注单一事务"],
+    careers: ["产品经理", "广告创意", "律师", "创业者", "战略咨询", "辩论教练"] },
+  INFJ: { name: "提倡者", nick: "绿老头", role: "外交家", roleEn: "NF", color: "#33A474",
+    tagline: "安静而坚定的理想主义者，默默推动世界变得更好。",
+    overview: "INFJ 表面温和内敛，内心却燃烧着强烈的信念。他们洞察力惊人，能敏锐地看穿他人的情绪和动机，并渴望帮助他人成长、让世界变得更好。他们追求意义和价值，很难接受只为利益而活的生活。这种理想主义让他们充满感染力，却也让他们对现实的不完美格外敏感，容易陷入自我消耗。",
+    strengths: ["同理心和洞察力强", "坚定而有原则", "善于激励和引导他人", "有深度的思考与远见"],
+    weaknesses: ["过于敏感，容易内耗", "对自己要求过高，容易倦怠", "不擅长拒绝别人", "习惯把情绪藏在心里"],
+    careers: ["心理咨询师", "教师", "作家", "社会工作者", "人力资源", "非营利组织"] },
+  INFP: { name: "调停者", nick: "小蝴蝶", role: "外交家", roleEn: "NF", color: "#33A474",
+    tagline: "诗意而善良的理想主义者，为内心坚信的价值而活。",
+    overview: "INFP 内心世界丰富而细腻，充满理想和浪漫。他们温柔、宽容，真诚地关心他人，忠于自己的价值观和信念，宁愿吃亏也不愿违背良心。他们渴望做有意义的事，讨厌虚伪、功利和冲突。这种纯粹让他们创作出打动人的东西，却也让他们在现实面前容易失望和受伤。",
+    strengths: ["真诚善良，有同理心", "想象力丰富，有创造力", "坚守原则，忠于内心", "包容、不轻易评判他人"],
+    weaknesses: ["过于理想化，容易失望", "情绪敏感，容易受伤", "执行力和现实感偏弱", "不善于应对冲突和压力"],
+    careers: ["作家", "设计师", "心理咨询", "编辑", "公益事业", "翻译"] },
+  ENFJ: { name: "主人公", nick: "宝剑哥", role: "外交家", roleEn: "NF", color: "#33A474",
+    tagline: "富有魅力的领路人，总能点燃身边人的热情。",
+    overview: "ENFJ 热情、有感染力，天生善于凝聚和鼓舞人心。他们真诚地关心他人，能敏锐地察觉每个人的需要，并愿意付出时间和精力帮助他人成长。他们追求和谐，擅长在群体中穿针引线，是天然的协调者和精神领袖。但也正因为他们太在意他人，往往容易忽略自己的需求。",
+    strengths: ["共情和沟通能力出色", "有号召力和感染力", "有责任感，乐于助人", "善于协调和凝聚团队"],
+    weaknesses: ["过度在意他人的看法", "容易忽略自己的需求", "难以接受批评和冲突", "有时显得过于理想化"],
+    careers: ["教师", "培训师", "公关", "人力资源", "管理者", "心理咨询"] },
+  ENFP: { name: "竞选者", nick: "快乐小狗", role: "外交家", roleEn: "NF", color: "#33A474",
+    tagline: "热情而自由的灵魂，总能发现生活里值得微笑的理由。",
+    overview: "ENFP 热情洋溢、充满活力，对世界和他人怀着真诚的好奇。他们点子多、联想力强，总能给身边的人带来惊喜和能量。他们讨厌束缚，渴望自由地探索各种可能性，几乎在任何环境里都能找到乐趣。不过这份热情来得快去得也快，专注和坚持对他们来说是需要刻意练习的功课。",
+    strengths: ["热情有感染力，善于社交", "想象力和创造力丰富", "乐观积极，适应力强", "能快速建立信任和连接"],
+    weaknesses: ["难以专注，容易分心", "情绪起伏较大", "不善处理细节和长期坚持", "容易高估自己，忽视风险"],
+    careers: ["市场营销", "公关", "创意策划", "记者", "培训师", "活动策划"] },
+  ISTJ: { name: "物流师", nick: "蓝老头", role: "守护者", roleEn: "SJ", color: "#4298B4",
+    tagline: "可靠而务实的人，说到就一定会做到。",
+    overview: "ISTJ 严谨、负责、踏实，是那种「把事交给他就放心」的人。他们尊重规则和秩序，做事有条不紊、一丝不苟，极其重视承诺和事实，从不轻易许诺，一旦答应就必定兑现。他们沉默寡言、不善言辞，却用一次次的行动赢得信任。稳定和可预期是他们最看重的品质。",
+    strengths: ["认真负责，可靠守信", "做事有条理，注重细节", "务实，说到做到", "尊重规则，有原则"],
+    weaknesses: ["过于固执，不善变通", "容易因循守旧", "不太表露情感，显得刻板", "对变化和不确定性适应慢"],
+    careers: ["会计", "审计", "工程师", "公务员", "项目经理", "法务"] },
+  ISFJ: { name: "守卫者", nick: "小护士", role: "守护者", roleEn: "SJ", color: "#4298B4",
+    tagline: "温暖而尽责的守护者，默默守护着所爱之人。",
+    overview: "ISFJ 温和、体贴、可靠，习惯把别人的需要放在自己之前。他们细心周到，记得住每个人的喜好和难处，并默默地用行动表达关心。他们重视家庭和传统，渴望安稳有序的生活，是身边人最踏实的依靠。只是这份无私的付出，常常让他们忘了照顾自己，也让他们不善于说出自己的委屈。",
+    strengths: ["细致体贴，有奉献精神", "踏实可靠，有责任心", "善于照顾和支持他人", "记忆力好，注重承诺"],
+    weaknesses: ["过于谦让，压抑自己", "不擅长拒绝，容易委屈自己", "抗拒变化和新事物", "习惯把情绪憋在心里"],
+    careers: ["护士", "教师", "行政管理", "社会工作者", "客服", "营养师"] },
+  ESTJ: { name: "总经理", nick: "尺子姐", role: "守护者", roleEn: "SJ", color: "#4298B4",
+    tagline: "出色的组织者，天生就懂得如何把事情办成。",
+    overview: "ESTJ 果断、务实、有条理，是天生的管理者和执行者。他们重视秩序、规则和结果，善于制定计划并监督落实，几乎没有什么事能逃过他们的安排。他们相信努力和传统的力量，讨厌懒散、混乱和借口。这种雷厉风行的作风让他们值得托付，但有时也显得强势、不近人情。",
+    strengths: ["组织管理和执行力强", "务实高效，目标明确", "有担当，值得信赖", "坚守承诺和规则"],
+    weaknesses: ["强势，爱发号施令", "不够灵活，缺乏耐心", "容易忽略他人感受", "对新鲜想法接受慢"],
+    careers: ["企业管理者", "军官", "项目经理", "法官", "运营", "公务员"] },
+  ESFJ: { name: "执政官", nick: "男妈妈", role: "守护者", roleEn: "SJ", color: "#4298B4",
+    tagline: "热心而周到的协调者，总在努力让每个人都被照顾到。",
+    overview: "ESFJ 热情、合群、乐于助人，是社交场合里不可或缺的「粘合剂」。他们重视和谐与传统，善于察言观色、照顾他人，努力让集体运转得顺滑。他们需要被需要，渴望他人的认可和感激，因此总是第一个站出来帮忙。但也正因为太在意关系，他们常常害怕冲突，习惯性地迎合别人。",
+    strengths: ["社交和协调能力出色", "热心周到，乐于付出", "有责任感，值得托付", "善于营造和谐氛围"],
+    weaknesses: ["过于在意他人的评价", "害怕冲突，习惯迎合", "不善于独处和反思", "情绪容易被外界影响"],
+    careers: ["教师", "护士", "人力资源", "行政", "销售", "社区服务"] },
+  ISTP: { name: "鉴赏家", nick: "电钻哥", role: "探险家", roleEn: "SP", color: "#E4AE3A",
+    tagline: "冷静而大胆的实践者，总能用双手搞定一切。",
+    overview: "ISTP 冷静、务实、心灵手巧，是天生的「行动派」和「动手达人」。他们擅长观察和理解事物如何运作，喜欢亲自动手拆解、修复和创造，常常在别人还在讨论方案时就已经把问题解决了。他们崇尚自由，不喜欢被束缚和说教，情绪稳定、处变不惊，是天生的「救火队员」。",
+    strengths: ["动手能力和实操能力强", "冷静沉着，处变不惊", "独立自主，适应力强", "善于分析和解决问题"],
+    weaknesses: ["不善表达情感，显得疏离", "缺乏长远规划", "容易冲动，寻求刺激", "对规则和约束不耐烦"],
+    careers: ["工程师", "技师", "程序员", "飞行员", "运动员", "外科医生"] },
+  ISFP: { name: "探险家", nick: "小画家", role: "探险家", roleEn: "SP", color: "#E4AE3A",
+    tagline: "温柔而随性的艺术家，随时准备拥抱新鲜体验。",
+    overview: "ISFP 安静、温和、随性，内心却充满对美和自由的向往。他们感官敏锐，对色彩、声音、气味格外敏感，习惯用行动而不是语言表达自己。他们活在当下，讨厌条条框框，喜欢用真实而细腻的体验去感受世界。这份随性和敏感让他们充满魅力，却也让他们在需要坚持和规划的事情上容易退缩。",
+    strengths: ["审美和创造力强", "温柔随和，善解人意", "活在当下，适应力强", "真诚，不装腔作势"],
+    weaknesses: ["缺乏长远规划", "逃避冲突和压力", "容易自我怀疑", "不善于表达和坚持主张"],
+    careers: ["设计师", "摄影师", "厨师", "美容师", "艺术家", "兽医"] },
+  ESTP: { name: "企业家", nick: "墨镜哥", role: "探险家", roleEn: "SP", color: "#E4AE3A",
+    tagline: "精力充沛的冒险家，享受在变化和挑战里打滚。",
+    overview: "ESTP 活力四射、大胆果断，是天生的行动派和冒险家。他们反应极快、临场应变一流，享受风险带来的刺激和即时的反馈，越是有压力越能超常发挥。他们脚踏实地、活在当下，讨厌空谈和拖延，相信实践出真知。这种冲劲让他们在商场和运动场上如鱼得水，却也容易冲动行事、忽略后果。",
+    strengths: ["行动力强，反应敏捷", "善于临场应变和谈判", "务实，有感染力", "抗压能力突出"],
+    weaknesses: ["容易冲动，不考虑后果", "缺乏耐心和长远规划", "容易厌倦一成不变", "不擅长处理抽象理论"],
+    careers: ["销售", "企业家", "运动员", "应急人员", "交易员", "市场拓展"] },
+  ESFP: { name: "表演者", nick: "锤子姐", role: "探险家", roleEn: "SP", color: "#E4AE3A",
+    tagline: "天生的开心果，走到哪里就把欢乐带到哪里。",
+    overview: "ESFP 热情开朗、充满活力，是天生的表演者和气氛担当。他们享受被关注、喜欢与人相处，善于用幽默和热情感染身边的人，让任何场合都热闹起来。他们活在当下，追求快乐和新鲜的体验，很少为过去后悔或为未来焦虑。这份乐观让他们广受欢迎，却也让他们容易只顾眼前的享乐，忽视长远的规划。",
+    strengths: ["热情有感染力，善于社交", "乐观积极，适应力强", "懂得享受生活，有审美", "待人真诚，不做作"],
+    weaknesses: ["注意力易分散，缺乏规划", "过于在意即时的快乐", "不擅长处理严肃复杂的问题", "容易回避需要坚持的事"],
+    careers: ["演员", "主持人", "销售", "导游", "幼教", "餐饮管理"] }
+};
+
+const TOTAL = QUESTIONS.length;
+let qIndex = 0;
+let answers = new Array(TOTAL).fill(null);
+let advanceTimer = null;
+
+const $ = (id) => document.getElementById(id);
+const views = {
+  landing: $("view-landing"),
+  test: $("view-test"),
+  result: $("view-result")
+};
+
+function show(view) {
+  Object.values(views).forEach((v) => v.classList.remove("active"));
+  views[view].classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+function buildDots() {
+  const wrap = $("dots");
+  wrap.innerHTML = "";
+  for (let i = 0; i < 7; i++) {
+    const dot = document.createElement("button");
+    dot.className = "dot";
+    dot.setAttribute("data-i", i);
+    dot.setAttribute("aria-label", "选项 " + (i + 1));
+    dot.addEventListener("click", () => selectAnswer(i));
+    wrap.appendChild(dot);
+  }
+}
+
+function renderDots() {
+  const sel = answers[qIndex];
+  document.querySelectorAll("#dots .dot").forEach((dot) => {
+    const i = Number(dot.getAttribute("data-i"));
+    dot.classList.remove("filled", "agree", "disagree", "neutral", "selected");
+    if (sel === null) return;
+    let filled = false;
+    let side = "";
+    if (sel <= 3) {
+      if (i >= sel && i <= 3) {
+        filled = true;
+        side = i === 3 ? "neutral" : "agree";
+      }
+    } else {
+      if (i >= 3 && i <= sel) {
+        filled = true;
+        side = i === 3 ? "neutral" : "disagree";
+      }
+    }
+    if (filled) dot.classList.add("filled", side);
+    if (i === sel) dot.classList.add("selected");
+  });
+}
+
+function updateProgress() {
+  const answered = answers.filter((a) => a !== null).length;
+  $("progress-fill").style.width = (answered / TOTAL) * 100 + "%";
+  $("q-cur").textContent = qIndex + 1;
+}
+
+function renderQuestion() {
+  $("question-text").textContent = QUESTIONS[qIndex].t;
+  $("btn-prev").disabled = qIndex === 0;
+  updateProgress();
+  renderDots();
+  $("question-text").style.animation = "none";
+  void $("question-text").offsetWidth;
+  $("question-text").style.animation = "";
+}
+
+function selectAnswer(i) {
+  answers[qIndex] = i;
+  renderDots();
+  updateProgress();
+  clearTimeout(advanceTimer);
+  advanceTimer = setTimeout(() => next(), 450);
+}
+
+function next() {
+  clearTimeout(advanceTimer);
+  if (qIndex < TOTAL - 1) {
+    qIndex++;
+    renderQuestion();
+  } else {
+    finishTest();
+  }
+}
+
+function prev() {
+  clearTimeout(advanceTimer);
+  if (qIndex > 0) {
+    qIndex--;
+    renderQuestion();
+  }
+}
+
+function finishTest() {
+  const score = { EI: 0, SN: 0, TF: 0, JP: 0 };
+  for (let i = 0; i < TOTAL; i++) {
+    const a = answers[i];
+    if (a === null) continue;
+    const q = QUESTIONS[i];
+    score[q.d] += q.s * (3 - a); // a: 0..6 -> 完全同意 .. 完全不同意
+  }
+  const maxScore = TOTAL / 4 * 3; // 15 * 3 = 45
+  const pct = {};
+  const letters = [];
+  DIMS.forEach((dim) => {
+    const p = Math.round(50 + (score[dim.key] / maxScore) * 50);
+    pct[dim.key] = Math.max(0, Math.min(100, p));
+    letters.push(pct[dim.key] > 50 ? dim.al : dim.bl);
+  });
+  renderResult(letters.join(""), pct);
+  show("result");
+}
+
+function renderResult(code, pct) {
+  const t = TYPES[code];
+  const roleColor = t.color;
+
+  $("r-code").textContent = code;
+  $("r-code").style.color = roleColor;
+  $("r-name").textContent = t.name;
+  $("r-nick").innerHTML = "别称 · <b>" + t.nick + "</b>";
+  $("r-role").innerHTML =
+    '<span class="role-dot" style="background:' + roleColor + '"></span>' +
+    t.role + " · " + t.roleEn;
+  $("r-tagline").textContent = t.tagline;
+
+  const dimsEl = $("r-dims");
+  dimsEl.innerHTML = "";
+  DIMS.forEach((dim) => {
+    const p = pct[dim.key];
+    const q = 100 - p;
+    const row = document.createElement("div");
+    row.className = "dim";
+    row.innerHTML =
+      '<div class="dim-head"><span>' + dim.a + " " + dim.al + '</span>' +
+      '<span class="b">' + dim.b + " " + dim.bl + '</span></div>' +
+      '<div class="dim-track"><div class="dim-fill" style="width:' + p + '%;background:' + roleColor + '"></div>' +
+      '<div class="dim-marker" style="left:' + p + '%;border-color:' + roleColor + '"></div></div>' +
+      '<div class="dim-pct"><span><b>' + p + '%</b> ' + dim.a + '</span>' +
+      '<span>' + dim.b + " <b>" + q + '%</b></span></div>';
+    dimsEl.appendChild(row);
+  });
+
+  $("r-overview").innerHTML =
+    '<h3>关于你</h3><p>' + t.overview + "</p>";
+
+  $("r-traits").innerHTML =
+    '<div class="trait-col"><h4>优点</h4><ul>' +
+    t.strengths.map((s) => "<li>" + s + "</li>").join("") +
+    '</ul></div><div class="trait-col"><h4>缺点</h4><ul>' +
+    t.weaknesses.map((s) => "<li>" + s + "</li>").join("") +
+    "</ul></div>";
+
+  $("r-careers").innerHTML =
+    '<h3>适合的职业</h3><div class="careers">' +
+    t.careers.map((c) => '<span class="career">' + c + "</span>").join("") +
+    "</div>";
+}
+
+function startTest() {
+  qIndex = 0;
+  answers = new Array(TOTAL).fill(null);
+  clearTimeout(advanceTimer);
+  show("test");
+  renderQuestion();
+}
+
+function exitTest() {
+  const answered = answers.filter((a) => a !== null).length;
+  if (answered > 0 && !confirm("进度尚未完成，确定要退出吗？")) return;
+  clearTimeout(advanceTimer);
+  show("landing");
+}
+
+$("btn-start").addEventListener("click", startTest);
+$("btn-retry").addEventListener("click", startTest);
+$("btn-prev").addEventListener("click", prev);
+$("btn-exit").addEventListener("click", exitTest);
+
+buildDots();
+</script>
+</body>
+</html>
